@@ -10,7 +10,7 @@ CORS(app)  # Enable CORS for all routes
 # MySQL Database Connection Details
 DB_HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "Si#200805"
+DB_PASSWORD = " "
 DB_NAME = "sensor_data"
 
 # Connect to MySQL database
