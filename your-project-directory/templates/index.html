@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered SMART GRID Sensor Feedback System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .container {
+            margin: 50px auto;
+            width: 80%;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .sensor-card {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sensor-card p {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+
+        .sensor-card span {
+            font-weight: bold;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            background-color: #fff9c4;
+            border: 1px solid #fff59d;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+        }
+
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            font-size: 18px;
+            color: #4CAF50;
+            text-align: center;
+        }
+    </style>
+    <script>
+        // Fetch the list of sensors from the back-end
+        async function fetchSensors() {
+            try {
+                const response = await fetch('/get_sensors');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const sensors = await response.json();
+
+                const sensorSelect = document.getElementById('sensor_select');
+
+                // Clear existing options
+                sensorSelect.innerHTML = '';
+
+                sensors.forEach(sensor => {
+                    const option = document.createElement('option');
+                    option.value = sensor;
+                    option.textContent = sensor;
+                    sensorSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching sensors:', error);
+                alert('Error fetching sensor list. Please try again later.');
+            }
+        }
+
+        // Fetch and display the details of the selected sensor
+        async function getSensorData() {
+            const sensorName = document.getElementById('sensor_select').value;
+            const loadingIndicator = document.getElementById('loading');
+            loadingIndicator.style.display = 'block'; // Show loading indicator
+
+            try {
+                const response = await fetch('/get_sensor_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sensor_name: sensorName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('sensor_name').innerText = data.sensor_name;
+                    document.getElementById('actual_value').innerText = data.actual_value;
+                    document.getElementById('ideal_value').innerText = data.ideal_value;
+                    document.getElementById('feedback').innerText = data.feedback;
+                } else {
+                    alert('Error fetching sensor data: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching sensor data:', error);
+                alert('Error fetching sensor data. Please try again later.');
+            } finally {
+                loadingIndicator.style.display = 'none'; // Hide loading indicator
+            }
+        }
+
+        // Fetch sensor list when the page loads
+        window.onload = fetchSensors;
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>AI-Powered SMART GRID Sensor Feedback System</h1>
+</header>
+
+<div class="container">
+    <div class="form-group">
+        <label for="sensor_select">Select Sensor:</label>
+        <select id="sensor_select">
+            <!-- Options will be populated dynamically -->
+        </select>
+        <button onclick="getSensorData()">Get Sensor Data</button>
+    </div>
+    
+    <div class="loading" id="loading">Loading sensor data...</div>
+
+    <div class="sensor-card">
+        <p>Sensor Name: <span id="sensor_name">N/A</span></p>
+        <p>Actual Sensor Value: <span id="actual_value">N/A</span></p>
+        <p>Ideal Sensor Value: <span id="ideal_value">N/A</span></p>
+    </div>
+
+    <div class="feedback">
+        <p>AI Feedback: <span id="feedback">N/A</span></p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 AI-Powered SMART GRID Sensor Feedback System</p>
+</footer>
+
+</body>
+</html>
